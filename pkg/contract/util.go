@@ -75,8 +75,8 @@ func newTransactOpts(client *ethclient.Client, conf *config.Config) (auth *bind.
 
 	auth = bind.NewKeyedTransactor(privateKey)
 	auth.Nonce = big.NewInt(int64(nonce))
-	auth.Value = big.NewInt(int64(0))       // in wei
-	auth.GasLimit = uint64(defaultGasLimit) // in units
+	auth.Value = big.NewInt(int64(0)) // in wei
+	// auth.GasLimit = uint64(defaultGasLimit) // in units
 	auth.GasPrice = gasPrice
 
 	return
@@ -200,6 +200,9 @@ func encode(t abi.Type, arg string) (result interface{}, err error) {
 	case abi.FixedBytesTy:
 		return abi.ReadFixedBytes(t, []byte(arg))
 	case abi.BytesTy:
+		if has0xPrefix(arg) {
+			arg = arg[2:]
+		}
 		result, err = hex.DecodeString(arg)
 		return
 	case abi.HashTy:
@@ -212,4 +215,9 @@ func encode(t abi.Type, arg string) (result interface{}, err error) {
 		err = fmt.Errorf("invalid type:%d", t.T)
 	}
 	return
+}
+
+// has0xPrefix validates str begins with '0x' or '0X'.
+func has0xPrefix(str string) bool {
+	return len(str) >= 2 && str[0] == '0' && (str[1] == 'x' || str[1] == 'X')
 }

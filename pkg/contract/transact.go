@@ -56,6 +56,7 @@ func Transact(conf *config.Config, solc, solidityFile, contractAddr, targetContr
 		params []interface{}
 		param  interface{}
 	)
+
 	for i, input := range method.Inputs {
 
 		param, err = encode(input.Type, args[i])
