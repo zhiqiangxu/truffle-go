@@ -102,7 +102,11 @@ func waitTransactionConfirm(client *ethclient.Client, hash common.Hash) {
 }
 
 func encodeToInt(unsigned bool, size int, arg string) (result interface{}, err error) {
-	n := big.NewInt(0).SetBytes([]byte(arg))
+	n, ok := big.NewInt(0).SetString(arg, 10)
+	if !ok {
+		err = fmt.Errorf("invalid arg for int:%s", arg)
+		return
+	}
 	if n.BitLen() > size {
 		err = fmt.Errorf("number overflow, got %s, expected size %d", arg, size)
 		return

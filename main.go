@@ -1,9 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
-	"fmt"
 
 	"github.com/zhiqinagxu/truffle-go/config"
 	"github.com/zhiqinagxu/truffle-go/pkg/contract"
@@ -37,11 +35,6 @@ func main() {
 	conf, err := config.LoadConfig(confFile)
 	if err != nil {
 		log.Fatal("LoadConfig fail", err)
-	}
-
-	{
-		confBytes, _ := json.MarshalIndent(conf, "", "    ")
-		fmt.Println("conf", string(confBytes))
 	}
 
 	switch function {
