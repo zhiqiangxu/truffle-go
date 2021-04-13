@@ -3,8 +3,11 @@ package contract
 import (
 	"context"
 	"crypto/ecdsa"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"math/big"
+	"reflect"
 	"strings"
 	"time"
 
@@ -161,9 +164,31 @@ func encode(t abi.Type, arg string) (result interface{}, err error) {
 	case abi.StringTy:
 		return arg, nil
 	case abi.SliceTy:
-		err = fmt.Errorf("slice type not supported yet")
+
+		var jsonArray []interface{}
+		err = json.Unmarshal([]byte(arg), &jsonArray)
+		if err != nil {
+			err = fmt.Errorf("slice arg not valid json:%v", err)
+			return
+		}
+
+		size := len(jsonArray)
+		refSlice := reflect.MakeSlice(t.GetType(), size, size)
+		result = refSlice.Interface()
+		err = json.Unmarshal([]byte(arg), &result)
+		if err != nil {
+			err = fmt.Errorf("slice arg Unmarshal failed:%v arg:%s", err, arg)
+			return
+		}
+
 	case abi.ArrayTy:
-		err = fmt.Errorf("array type not supported yet")
+		refSlice := reflect.New(t.GetType()).Elem()
+		result = refSlice.Interface()
+		err = json.Unmarshal([]byte(arg), &result)
+		if err != nil {
+			err = fmt.Errorf("array arg Unmarshal failed:%v arg:%s", err, arg)
+			return
+		}
 	case abi.TupleTy:
 		err = fmt.Errorf("tuple type not supported yet")
 	case abi.AddressTy:
@@ -171,7 +196,8 @@ func encode(t abi.Type, arg string) (result interface{}, err error) {
 	case abi.FixedBytesTy:
 		return abi.ReadFixedBytes(t, []byte(arg))
 	case abi.BytesTy:
-		return []byte(arg), nil
+		result, err = hex.DecodeString(arg)
+		return
 	case abi.HashTy:
 		err = fmt.Errorf("hash type not supported yet")
 	case abi.FixedPointTy:

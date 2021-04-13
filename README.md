@@ -3,6 +3,13 @@
 ## steps
 
 ```
+# setup config
+cat config.json
+{
+    "Node": "http://40.115.136.96:8546",
+    "PrivateKey": "ddcd681532fcb1b7c49591bcec03a7ff3b455f7554f855b21c3ae9fb06765fd6"
+}
+
 # deploy contract
 go run main.go -func deploy -solc '/Users/xuzhiqiang/Downloads/solc-macosx-amd64-v0.6.0+commit.26b70077'  -sol '/Users/xuzhiqiang/Desktop/workspace/opensource/solidity_contracts/poly-swap/contracts/core/lock_proxy/selectSwap.sol' -contract Select
 
