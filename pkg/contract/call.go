@@ -15,7 +15,16 @@ import (
 
 // Call ...
 func Call(conf *config.Config, solc, solidityFile, contractAddr, targetContract, methodName string, args []string) {
-	rawContracts, err := compiler.CompileSolidity(solc, solidityFile)
+	var (
+		rawContracts map[string]*compiler.Contract
+		err          error
+	)
+	if strings.HasSuffix(solidityFile, ".sol") {
+		rawContracts, err = compiler.CompileSolidity(solc, solidityFile)
+	} else {
+		rawContracts, err = compiler.CompileVyper(solc, solidityFile)
+	}
+
 	if err != nil {
 		log.Fatalf("CompileSolidity failed: %v", err)
 	}
