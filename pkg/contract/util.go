@@ -217,6 +217,37 @@ func encode(t abi.Type, arg string) (result interface{}, err error) {
 	return
 }
 
+func format(t abi.Type, value interface{}) string {
+	switch t.T {
+	case abi.TupleTy:
+		panic("tuple not supported")
+	case abi.SliceTy:
+		panic("slice not supported")
+	case abi.ArrayTy:
+		panic("array not supported")
+	case abi.StringTy:
+		return fmt.Sprintf("%v", value)
+	case abi.IntTy, abi.UintTy:
+		return fmt.Sprintf("%v", value)
+	case abi.BoolTy:
+		return fmt.Sprintf("%v", value)
+	case abi.AddressTy:
+		return value.(common.Address).Hex()
+	case abi.HashTy:
+		return "0x" + value.(common.Hash).Hex()
+	case abi.BytesTy:
+		return "0x" + hex.EncodeToString(value.([]byte))
+	case abi.FixedBytesTy:
+		sliceType := reflect.TypeOf([]byte{})
+		return "0x" + hex.EncodeToString(reflect.ValueOf(value).Convert(sliceType).Interface().([]byte))
+	case abi.FunctionTy:
+		rawV := value.([24]byte)
+		return "0x" + hex.EncodeToString(rawV[:])
+	default:
+		panic(fmt.Sprintf("abi: unknown type %v", t.T))
+	}
+}
+
 // has0xPrefix validates str begins with '0x' or '0X'.
 func has0xPrefix(str string) bool {
 	return len(str) >= 2 && str[0] == '0' && (str[1] == 'x' || str[1] == 'X')

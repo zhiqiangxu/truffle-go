@@ -78,6 +78,9 @@ func Call(conf *config.Config, solc, solidityFile, contractAddr, targetContract,
 		log.Fatalf("bc.Call failed: %v", err)
 	}
 
-	fmt.Println("results", results)
+	for i, result := range results {
+		ty := method.Outputs[i].Type
+		log.Infof("output %d(type %s) is: %s", i+1, ty.String(), format(ty, result))
+	}
 
 }
