@@ -79,9 +79,11 @@ func Transact(conf *config.Config, solc, solidityFile, contractAddr, targetContr
 
 	tx, err := bc.Transact(auth, methodName, params...)
 	if err != nil {
-		log.Fatalf("bc.Transact failed: %v", err)
+		log.Fatalf("bc.Transact failed: %v, account:%s", err, auth.From.Hex())
 	}
-	waitTransactionConfirm(client, tx.Hash())
+	if !conf.Quick {
+		waitTransactionConfirm(client, tx.Hash())
+	}
 
 	log.Info("hash", tx.Hash())
 

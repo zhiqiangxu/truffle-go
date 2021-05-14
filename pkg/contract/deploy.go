@@ -71,9 +71,11 @@ func Deploy(conf *config.Config, solc, solidityFile, targetContract string, args
 
 	address, tx, _, err := bind.DeployContract(auth, evmABI, common.FromHex(contract.Code), client, params...)
 	if err != nil {
-		log.Fatalf("bind.DeployContract failed: %v", err)
+		log.Fatalf("bind.DeployContract failed: %v, account:%s", err, auth.From.Hex())
 	}
-	waitTransactionConfirm(client, tx.Hash())
+	if !conf.Quick {
+		waitTransactionConfirm(client, tx.Hash())
+	}
 
 	log.Infof("contract deployed at %s", address.Hex())
 	return
