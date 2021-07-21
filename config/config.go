@@ -9,6 +9,7 @@ import (
 type Config struct {
 	Node       string
 	PrivateKey string
+	ChainID    int
 	Quick      bool
 }
 

@@ -73,7 +73,16 @@ func newTransactOpts(client *ethclient.Client, conf *config.Config) (auth *bind.
 		return
 	}
 
-	auth = bind.NewKeyedTransactor(privateKey)
+	if conf.ChainID > 0 {
+		auth, err = bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(int64(conf.ChainID)))
+		if err != nil {
+			err = fmt.Errorf("bind.NewKeyedTransactorWithChainID failed:%v", err)
+			return
+		}
+	} else {
+		auth = bind.NewKeyedTransactor(privateKey)
+	}
+
 	auth.Nonce = big.NewInt(int64(nonce))
 	auth.Value = big.NewInt(int64(0)) // in wei
 	// auth.GasLimit = uint64(defaultGasLimit) // in units
