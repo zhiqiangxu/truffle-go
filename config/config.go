@@ -11,6 +11,7 @@ type Config struct {
 	PrivateKey string
 	ChainID    int
 	Quick      bool
+	Verbose    bool
 }
 
 // LoadConfig ...

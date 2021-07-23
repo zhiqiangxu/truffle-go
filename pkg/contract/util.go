@@ -84,8 +84,8 @@ func newTransactOpts(client *ethclient.Client, conf *config.Config) (auth *bind.
 	}
 
 	auth.Nonce = big.NewInt(int64(nonce))
-	auth.Value = big.NewInt(int64(0)) // in wei
-	// auth.GasLimit = uint64(defaultGasLimit) // in units
+	auth.Value = big.NewInt(int64(0))       // in wei
+	auth.GasLimit = uint64(defaultGasLimit) // in units
 	auth.GasPrice = gasPrice
 
 	return

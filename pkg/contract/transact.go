@@ -1,6 +1,7 @@
 package contract
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -76,6 +77,15 @@ func Transact(conf *config.Config, solc, solidityFile, contractAddr, targetContr
 	}
 
 	bc := bind.NewBoundContract(common.HexToAddress(contractAddr), evmABI, client, client, nil)
+
+	if conf.Verbose {
+		paramBytes, err := evmABI.Pack(methodName, params...)
+		if err != nil {
+			log.Fatalf("evmABI.Pack failed:%v", err)
+		}
+
+		log.Info("paramBytes", hex.EncodeToString(paramBytes))
+	}
 
 	tx, err := bc.Transact(auth, methodName, params...)
 	if err != nil {
