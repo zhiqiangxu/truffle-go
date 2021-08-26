@@ -42,6 +42,15 @@ func main() {
 		contract.Deploy(conf, solc, sol, targetContract, flag.Args())
 	case "call":
 		contract.Call(conf, solc, sol, contractAddr, targetContract, targetMethod, flag.Args())
+	case "rawcall":
+		if len(flag.Args()) > 1 {
+			log.Fatal("rawcall expects a single combined hex argument")
+		}
+		var hexarg string
+		if len(flag.Args()) == 1 {
+			hexarg = flag.Args()[0]
+		}
+		contract.RawCall(conf, contractAddr, targetMethod, hexarg)
 	case "transact":
 		contract.Transact(conf, solc, sol, contractAddr, targetContract, targetMethod, flag.Args())
 	default:
