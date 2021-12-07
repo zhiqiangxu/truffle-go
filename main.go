@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
+	"io/ioutil"
 
 	"github.com/zhiqinagxu/truffle-go/config"
 	"github.com/zhiqinagxu/truffle-go/pkg/contract"
@@ -14,7 +16,9 @@ var sol string
 var targetContract string
 var contractAddr string
 var targetMethod string
+var rawFile string
 var solc string
+var pkFile string
 
 func init() {
 	flag.StringVar(&confFile, "conf", "./config.json", "configuration file path")
@@ -23,6 +27,8 @@ func init() {
 	flag.StringVar(&targetContract, "contract", "", "specify target contract")
 	flag.StringVar(&contractAddr, "addr", "", "specify contract address")
 	flag.StringVar(&targetMethod, "method", "", "specify target method")
+	flag.StringVar(&rawFile, "raw", "", "specify raw data file")
+	flag.StringVar(&pkFile, "pk", "", "specify pk file")
 	flag.StringVar(&solc, "solc", "", "specify solidity compiler")
 
 	flag.Parse()
@@ -36,6 +42,13 @@ func main() {
 	if err != nil {
 		log.Fatal("LoadConfig fail", err)
 	}
+	if pkFile != "" {
+		pkBytes, err := ioutil.ReadFile(pkFile)
+		if err != nil {
+			log.Fatal("ReadFile fail", err)
+		}
+		conf.PrivateKey = string(pkBytes)
+	}
 
 	switch function {
 	case "deploy":
@@ -43,14 +56,23 @@ func main() {
 	case "call":
 		contract.Call(conf, solc, sol, contractAddr, targetContract, targetMethod, flag.Args())
 	case "rawcall":
-		if len(flag.Args()) > 1 {
-			log.Fatal("rawcall expects a single combined hex argument")
+		if len(rawFile) == 0 {
+			log.Fatal("raw data file not specified")
 		}
-		var hexarg string
-		if len(flag.Args()) == 1 {
-			hexarg = flag.Args()[0]
+		rawDataBytes, err := ioutil.ReadFile(rawFile)
+		if err != nil {
+			log.Fatal("ReadFile fail", err)
 		}
-		contract.RawCall(conf, contractAddr, targetMethod, hexarg)
+
+		data := struct {
+			ContractAddr string
+			HexData      string
+		}{}
+		err = json.Unmarshal(rawDataBytes, &data)
+		if err != nil {
+			log.Fatal("LoadConfig fail", err)
+		}
+		contract.RawCall(conf, data.ContractAddr, data.HexData)
 	case "transact":
 		contract.Transact(conf, solc, sol, contractAddr, targetContract, targetMethod, flag.Args())
 	default:

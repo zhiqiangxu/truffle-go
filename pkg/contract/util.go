@@ -67,10 +67,15 @@ func newTransactOpts(client *ethclient.Client, conf *config.Config) (auth *bind.
 		return
 	}
 
-	gasPrice, err := client.SuggestGasPrice(context.Background())
-	if err != nil {
-		err = fmt.Errorf("client.SuggestGasPrice failed:%v", err)
-		return
+	gasPrice := big.NewInt(0)
+	if conf.GasPrice > 0 {
+		gasPrice.SetInt64(conf.GasPrice)
+	} else {
+		gasPrice, err = client.SuggestGasPrice(context.Background())
+		if err != nil {
+			err = fmt.Errorf("client.SuggestGasPrice failed:%v", err)
+			return
+		}
 	}
 
 	if conf.ChainID > 0 {

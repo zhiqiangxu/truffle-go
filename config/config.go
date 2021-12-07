@@ -10,6 +10,7 @@ type Config struct {
 	Node       string
 	PrivateKey string
 	ChainID    int
+	GasPrice   int64
 	Quick      bool
 	Verbose    bool
 }
