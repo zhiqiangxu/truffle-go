@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
@@ -11,20 +12,18 @@ import (
 	"github.com/zhiqinagxu/truffle-go/pkg/log"
 )
 
-func RawCall(conf *config.Config, contractAddr, hexdata string) {
+func RawCall(conf *config.Config, param RawParam) {
 
 	client, err := newClient(conf)
 	if err != nil {
 		log.Fatalf("newClient failed: %v", err)
 	}
 
-	data, err := hex.DecodeString(hexdata)
-	if err != nil {
-		log.Fatalf("DecodeString hexarg failed: %v", err)
-	}
+	data := common.FromHex(param.HexData)
 
-	toAddr := common.HexToAddress(contractAddr)
-	result, err := client.CallContract(context.Background(), ethereum.CallMsg{To: &toAddr, Data: data}, nil)
+	toAddr := common.HexToAddress(param.ContractAddr)
+	value := big.NewInt(param.Value)
+	result, err := client.CallContract(context.Background(), ethereum.CallMsg{To: &toAddr, Gas: param.GasLimit, Value: value, Data: data}, nil)
 	if err != nil {
 		log.Fatalf("CallContract failed: %v", err)
 	}

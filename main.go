@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"flag"
 	"io/ioutil"
+	"strings"
 
+	"github.com/BurntSushi/toml"
 	"github.com/zhiqinagxu/truffle-go/config"
 	"github.com/zhiqinagxu/truffle-go/pkg/contract"
 	"github.com/zhiqinagxu/truffle-go/pkg/log"
@@ -55,24 +57,34 @@ func main() {
 		contract.Deploy(conf, solc, sol, targetContract, flag.Args())
 	case "call":
 		contract.Call(conf, solc, sol, contractAddr, targetContract, targetMethod, flag.Args())
-	case "rawcall":
+	case "rawcall", "rawtransact":
 		if len(rawFile) == 0 {
 			log.Fatal("raw data file not specified")
 		}
+		isToml := strings.HasSuffix(rawFile, "toml")
 		rawDataBytes, err := ioutil.ReadFile(rawFile)
 		if err != nil {
 			log.Fatal("ReadFile fail", err)
 		}
 
-		data := struct {
-			ContractAddr string
-			HexData      string
-		}{}
-		err = json.Unmarshal(rawDataBytes, &data)
+		var param contract.RawParam
+		if isToml {
+			_, err = toml.Decode(string(rawDataBytes), &param)
+		} else {
+			err = json.Unmarshal(rawDataBytes, &param)
+		}
+
 		if err != nil {
 			log.Fatal("LoadConfig fail", err)
 		}
-		contract.RawCall(conf, data.ContractAddr, data.HexData)
+
+		switch function {
+		case "rawcall":
+			contract.RawCall(conf, param)
+		case "rawtransact":
+			contract.RawTransact(conf, param)
+		}
+
 	case "transact":
 		contract.Transact(conf, solc, sol, contractAddr, targetContract, targetMethod, flag.Args())
 	default:
