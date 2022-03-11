@@ -32,7 +32,14 @@ func Deploy(conf *config.Config, solc, solidityFile, targetContract string, args
 
 	contract := contracts[targetContract]
 	if contract == nil {
-		log.Fatalf(fmt.Sprintf("contract not found:%s", targetContract))
+		if len(contracts) == 1 {
+			for _, c := range contracts {
+				contract = c
+				break
+			}
+		} else {
+			log.Fatalf(fmt.Sprintf("contract not found:%s", targetContract))
+		}
 	}
 
 	abiBytes, err := json.Marshal(contract.Info.AbiDefinition)
